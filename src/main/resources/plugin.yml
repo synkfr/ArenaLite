@@ -1,0 +1,35 @@
+name: ArenaLite
+version: '1.0'
+main: org.ayosynk.ArenaLite
+api-version: '1.21'
+author: AyoSynk
+description: A premium kit-based FFA system with FAWE async regen
+
+commands:
+  ffa:
+    description: Main FFA command
+    usage: /<command> [join|leave|kit|regen|reload]
+    aliases: []
+  ffasetup:
+    description: FFA setup command
+    usage: /<command> [wand|create|setspawn|setregen|kit|kitlink]
+    aliases: []
+
+permissions:
+  arenalite.*:
+    description: All ArenaLite permissions
+    default: op
+    children:
+      arenalite.use: true
+      arenalite.admin: true
+  arenalite.use:
+    description: Use FFA commands
+    default: true
+  arenalite.admin:
+    description: Admin commands
+    default: op
+
+softdepend:
+  - FastAsyncWorldEdit
+  - PlaceholderAPI
+  - Vault

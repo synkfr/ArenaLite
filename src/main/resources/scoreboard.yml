@@ -1,0 +1,17 @@
+# Scoreboard Configuration
+
+enabled: true
+title: "&6&lArenaLite"
+update-interval: 20  # Ticks
+
+lines:
+  - "&7&m-------------------"
+  - "&eKills: &f%arenalite_kills%"
+  - "&eDeaths: &f%arenalite_deaths%"
+  - "&eKDR: &f%arenalite_kdr%"
+  - "&eStreak: &f%arenalite_streak%"
+  - ""
+  - "&eKit: &f%arenalite_kit%"
+  - "&eArena: &f%arenalite_arena%"
+  - "&7&m-------------------"
+

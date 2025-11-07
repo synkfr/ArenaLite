@@ -1,0 +1,51 @@
+# ArenaLite Configuration
+# Premium kit-based FFA system with FAWE async regen
+
+# Join Protection Settings
+join-protection:
+  enabled: true          # Enable/disable join protection
+  duration: 10           # Duration in seconds
+  clear-effects: true    # Clear active potion effects on join
+
+# Anti-Cleanup Settings
+anti-cleanup:
+  enabled: true          # Toggle the entire anti-cleanup system
+  regen:
+    enabled: true        # Toggle the regeneration effect
+    duration: 3          # Duration in seconds
+  resistance:
+    enabled: true        # Toggle the resistance effect
+    duration: 5          # Duration in seconds
+    level: 2             # Resistance level (0-255)
+
+# Arena Defaults
+arenas:
+  default-build-enabled: true   # New arenas allow building by default
+  default-regen-enabled: false  # Automatically enable regen on /ffasetup create
+  default-regen-interval: 300   # Interval in seconds when regen is enabled
+
+# Gameplay Settings
+settings:
+  hotbar-enabled: false         # Enable/disable hotbar items
+  scoreboard-enabled: true      # Enable/disable scoreboard
+  kit-previews:
+    enabled: true               # Toggle kit previews command
+    readonly: true              # Prevent players from taking items from preview
+  instant-respawn-delay: 1      # Ticks before kit re-application after respawn
+
+# FFA hub spawn (set via /ffa setspawn)
+ffa:
+  spawn: ""
+
+# Player data storage options
+storage:
+  type: YAML # YAML or MYSQL
+  mysql:
+    host: localhost
+    port: 3306
+    database: arenalite
+    username: root
+    password: password
+    use-ssl: false
+    table-prefix: arenalite_
+

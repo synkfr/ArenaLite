@@ -1,0 +1,19 @@
+# Settings Configuration
+
+# Hotbar Settings
+hotbar:
+  enabled: false
+  items:
+    - slot: 0
+      material: DIAMOND_SWORD
+      display-name: "&6Join FFA"
+      lore:
+        - "&7Click to join FFA"
+      command: "ffa join"
+    - slot: 8
+      material: REDSTONE
+      display-name: "&cLeave FFA"
+      lore:
+        - "&7Click to leave FFA"
+      command: "ffa leave"
+

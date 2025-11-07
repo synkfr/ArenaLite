@@ -1,0 +1,102 @@
+# Message Configuration
+
+# General Messages
+messages:
+  no-permission: "&cYou don't have permission to do this!"
+  arena-not-found: "&cArena &e%arena% &cnot found!"
+  arena-exists: "&cArena &e%arena% &calready exists!"
+  arena-no-spawn: "&cArena &e%arena% &chas no spawn set!"
+  kit-not-found: "&cKit &e%kit% &cnot found!"
+  kit-exists: "&cKit &e%kit% &calready exists!"
+  kit-no-arena: "&cThis kit is not linked to an arena!"
+  not-in-arena: "&cYou are not in an arena!"
+  joined-arena: "&aYou joined arena &e%arena% &awith kit &e%kit%&a!"
+  left-arena: "&aYou left the arena!"
+  kit-preview: "&aPreviewing kit: &e%kit%"
+  spawn-not-set: "&cFFA spawn is not set! Use &e/ffa setspawn &cto configure it."
+  build-disabled: "&cBuilding is disabled in this arena!"
+  feature-disabled: "&c%feature% is currently disabled."
+
+# Command Messages
+commands:
+  ffa:
+    help: |
+      &6&l=== ArenaLite Commands ===
+      &e/ffa join <kit> &7- Join an arena with a kit
+      &e/ffa leave &7- Leave the current arena
+      &e/ffa kit preview <kit> &7- Preview a kit
+      &e/ffa kit create <kit> &7- Create a kit from inventory (admin)
+      &e/ffa setspawn &7- Set the FFA hub spawn (admin)
+      &e/ffa regen <arena> &7- Manually regen an arena
+      &e/ffa reload &7- Reload the plugin
+    join:
+      usage: "&cUsage: /ffa join <kit>"
+    leave:
+      usage: "&cUsage: /ffa leave"
+    kit:
+      usage: "&cUsage: /ffa kit <preview|create> <kit>"
+    setspawn:
+      usage: "&cUsage: /ffa setspawn"
+      success: "&aFFA spawn set to your current location!"
+    regen:
+      usage: "&cUsage: /ffa regen <arena>"
+      started: "&aRegen started for arena &e%arena%&a!"
+    reload:
+      success: "&aPlugin reloaded!"
+      
+  ffasetup:
+    help: |
+      &6&l=== ArenaLite Setup Commands ===
+      &e/ffasetup wand &7- Get selection wand
+      &e/ffasetup create <arena> &7- Create an arena
+      &e/ffasetup delete <arena> &7- Delete an arena
+      &e/ffasetup setspawn <arena> &7- Set arena spawn
+      &e/ffasetup setregen <arena> <true|false> &7- Enable/disable regen
+      &e/ffasetup build <arena> <true|false> &7- Toggle building in an arena
+      &e/ffasetup list &7- List all arenas
+      &e/ffasetup kit create <kit> &7- Create a kit from inventory
+      &e/ffasetup kit delete <kit> &7- Delete a kit
+      &e/ffasetup kitlink <kit> <arena> &7- Link kit to arena
+    wand:
+      received: "&aYou received the arena selection wand!"
+    create:
+      usage: "&cUsage: /ffasetup create <arena>"
+      success: "&aArena &e%arena% &acreated!"
+      instructions: "&7Left-click for pos1, right-click for pos2"
+      select-corners: "&e&l[!] &7You need to select both corners with the wand first!"
+      region-set: "&aRegion automatically set from your previous selection!"
+    delete:
+      usage: "&cUsage: /ffasetup delete <arena>"
+      success: "&aArena &e%arena% &ahas been deleted!"
+    setspawn:
+      usage: "&cUsage: /ffasetup setspawn <arena>"
+      success: "&aSpawn set for arena &e%arena%&a!"
+      no-region: "&cArena &e%arena% &chas no region set! Select corners first with the wand."
+      select-corners: "&7Use &e/ffasetup wand &7to get the selection wand, then select corners."
+      outside-region: "&cYou must be inside the arena region to set the spawn!"
+    setregen:
+      usage: "&cUsage: /ffasetup setregen <arena> <true|false>"
+      success: "&aRegen &e%enabled% &aset for arena &e%arena%&a!"
+      no-region: "&cArena &e%arena% &chas no region set! Select corners first."
+      no-spawn: "&cArena &e%arena% &chas no spawn set! Set spawn first with /ffasetup setspawn."
+      invalid-value: "&cInvalid value! Use &etrue &cor &efalse&c."
+      fawe-warning: "&e&l[!] &7Warning: FAWE is not installed! Regen will not work."
+    build:
+      usage: "&cUsage: /ffasetup build <arena> <true|false>"
+      success: "&aBuilding has been &e%value% &afor arena &e%arena%&a!"
+      invalid-value: "&cInvalid value! Use &etrue &cor &efalse&c."
+    kit:
+      create:
+        usage: "&cUsage: /ffasetup kit create <kit>"
+        success: "&aKit &e%kit% &acreated!"
+      delete:
+        usage: "&cUsage: /ffasetup kit delete <kit>"
+        success: "&aKit &e%kit% &adeleted!"
+    kitlink:
+      usage: "&cUsage: /ffasetup kitlink <kit> <arena>"
+      success: "&aKit &e%kit% &alinked to arena &e%arena%&a!"
+    list:
+      header: "&6&lArenas (&e%count%&6):"
+      entry: " &7- &e%arena%&7 (spawn: %spawn%, regen: %regen%, build: %build%)"
+      empty: "&cNo arenas have been created yet."
+
