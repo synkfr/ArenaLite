@@ -6,7 +6,7 @@ Follow this guide to deploy ArenaLite and create your first playable arena.
 
 - Paper 1.21+ (or a compatible fork)
 - Operator/`arenalite.admin` permission
-- (Optional) FastAsyncWorldEdit for regeneration
+- (Optional) FastAsyncWorldEdit to speed up regeneration. Without FAWE, ArenaLite uses built-in snapshot-based regen.
 - (Optional) PlaceholderAPI for placeholders
 - (Optional) Vault for future economy rewards
 
@@ -48,6 +48,7 @@ Save the file and run `/ffa reload` whenever you adjust it.
    ```
    /ffasetup setspawn desert
    ```
+   Ensure the spawn is inside the selected region. It will be used to safely teleport players during regeneration.
 
 5. **Optional toggles**
    ```
@@ -128,7 +129,7 @@ Repeat the creation steps for each arena/kit pair:
 | **Players cannot build/break** | Ensure `/ffasetup build <arena> true` is set. |
 | **Players spawn outside the arena** | Re-run `/ffasetup setspawn <arena>`. |
 | **Kit not found** | Confirm `/ffasetup kit create` succeeded and `/ffasetup kitlink` is set. |
-| **Regen not working** | Install FAWE and enable regen via `/ffasetup setregen <arena> true`. |
+| **Regen not working** | Ensure the arena region and spawn are set, then enable regen via `/ffasetup setregen <arena> true`. FAWE is optional. |
 
 ## Next Steps
 

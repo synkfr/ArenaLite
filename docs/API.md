@@ -64,9 +64,25 @@ stats.savePlayerData(data);  // async
 
 `PlayerData` exposes current arena context and persistent statistics (kills, deaths, streak). Saving is performed asynchronously via `CompletableFuture`.
 
+## RegenManager
+
+Built-in snapshot-based regeneration works without FAWE. You can also query freeze state during safe regen.
+
+```java
+RegenManager regen = plugin.getRegenManager();
+
+// Trigger a regeneration of an arena (safe regen: teleports players to setspawn and locks movement)
+regen.regenArena(arena);
+
+// Check if a player is currently frozen due to an in-progress regen
+boolean frozen = regen.isFrozen(player);
+```
+
+For performance, block restoration is throttled using `regen.blocks-per-tick` from `config.yml`.
+
 ## Hooks
 
-- `getFAWEHook()` – present when FAWE is installed.
+- `getFAWEHook()` – present when FAWE is installed (optional; improves regeneration performance on large regions).
 - `getPlaceholderAPIHook()` – present when PlaceholderAPI is installed.
 - `getVaultHook()` – present when Vault is installed.
 
@@ -75,7 +91,11 @@ Always null-check hooks before use.
 ```java
 FAWEHook fawe = plugin.getFAWEHook();
 if (fawe != null && fawe.isAvailable()) {
+    // Optionally delegate to FAWE for regeneration if you prefer its pipeline
     fawe.regenArena(arena);
+} else {
+    // Fallback to built-in snapshot regen
+    plugin.getRegenManager().regenArena(arena);
 }
 ```
 

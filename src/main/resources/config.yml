@@ -18,6 +18,12 @@ anti-cleanup:
     duration: 5          # Duration in seconds
     level: 2             # Resistance level (0-255)
 
+# Regeneration Settings
+# Tune snapshot restore performance and default interval when enabling regen via setup command
+regen:
+  blocks-per-tick: 500     # Number of blocks to restore per tick during snapshot regen
+  default-interval: 300    # Default interval (seconds) applied by /ffasetup setregen <arena> true
+
 # Arena Defaults
 arenas:
   default-build-enabled: true   # New arenas allow building by default

@@ -11,8 +11,9 @@ ArenaLite is lightweight by design, but the following tips will help keep your F
 
 ## Arena Regeneration
 
-- **FAWE is required** for regeneration. Without it, regen commands are ignored.
+- Regeneration works out-of-the-box via built-in snapshot restore. FAWE is optional but improves performance on large regions.
 - Keep selections as tight as possible—larger regions mean longer snapshots.
+- Tune `regen.blocks-per-tick` in `config.yml` to balance TPS vs. speed (default: 500).
 - Adjust `arenas.default-regen-interval` and per-arena regen intervals based on server TPS.
 
 ## Build & PvP Overrides
@@ -28,7 +29,7 @@ Join protection and anti-cleanup effects use standard potion effects and invulne
 
 ## Monitoring Checklist
 
-- Watch your console for FAWE warnings during arena regen.
+- Watch your console for warnings during arena regen (FAWE load messages, snapshot restore progress).
 - Track database latency if you switch to MySQL—slow connections will show as delayed stat updates.
 - Use `/ffasetup list` periodically to verify arena state at a glance.
 

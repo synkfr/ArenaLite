@@ -36,8 +36,8 @@ public class RegenManager {
     }
     
     public void regenArena(Arena arena) {
-        if (plugin.getFAWEHook() == null || !plugin.getFAWEHook().isAvailable()) {
-            plugin.getLogger().warning("Cannot regen arena " + arena.getName() + ": FAWE not available!");
+        if (arena.getWorld() == null || arena.getPos1() == null || arena.getPos2() == null) {
+            plugin.getLogger().warning("Cannot regen arena " + arena.getName() + ": world or region not set!");
             return;
         }
         
@@ -54,8 +54,8 @@ public class RegenManager {
         }
         frozenPlayers.put(arena.getName(), frozen);
         
-        // Perform async regen
-        plugin.getFAWEHook().regenArena(arena).thenRun(() -> {
+        // Ensure snapshot exists, then restore
+        Runnable afterRestore = () -> {
             // Unfreeze players
             Set<UUID> unfreeze = frozenPlayers.remove(arena.getName());
             if (unfreeze != null) {
@@ -69,7 +69,31 @@ public class RegenManager {
             
             arena.setLastRegen(System.currentTimeMillis());
             plugin.getLogger().info("Arena " + arena.getName() + " has been regenerated!");
-        });
+        };
+
+        if (!plugin.getSnapshotManager().hasSnapshot(arena)) {
+            plugin.getLogger().info("No snapshot for arena " + arena.getName() + ", capturing now...");
+            plugin.getSnapshotManager().captureSnapshot(arena).whenComplete((v, ex) -> {
+                if (ex != null) {
+                    plugin.getLogger().severe("Failed to capture snapshot for arena " + arena.getName() + ": " + ex.getMessage());
+                    afterRestore.run();
+                    return;
+                }
+                plugin.getSnapshotManager().restoreSnapshot(arena).whenComplete((vv, ex2) -> {
+                    if (ex2 != null) {
+                        plugin.getLogger().severe("Failed to restore snapshot for arena " + arena.getName() + ": " + ex2.getMessage());
+                    }
+                    afterRestore.run();
+                });
+            });
+        } else {
+            plugin.getSnapshotManager().restoreSnapshot(arena).whenComplete((v, ex) -> {
+                if (ex != null) {
+                    plugin.getLogger().severe("Failed to restore snapshot for arena " + arena.getName() + ": " + ex.getMessage());
+                }
+                afterRestore.run();
+            });
+        }
     }
     
     private void freezePlayer(Player player) {

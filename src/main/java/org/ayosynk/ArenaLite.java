@@ -3,15 +3,18 @@ package org.ayosynk;
 import org.ayosynk.hooks.FAWEHook;
 import org.ayosynk.hooks.PlaceholderAPIHook;
 import org.ayosynk.hooks.VaultHook;
+import org.ayosynk.hooks.ArenaRegenPlaceholder;
 import org.ayosynk.listeners.BuildListener;
 import org.ayosynk.listeners.CombatListener;
 import org.ayosynk.listeners.KitPreviewListener;
 import org.ayosynk.listeners.PlayerListener;
+import org.ayosynk.listeners.FreezeListener;
 import org.ayosynk.managers.ArenaManager;
 import org.ayosynk.managers.ConfigManager;
 import org.ayosynk.managers.KitManager;
 import org.ayosynk.managers.RegenManager;
 import org.ayosynk.managers.StatsManager;
+import org.ayosynk.managers.SnapshotManager;
 import org.ayosynk.storage.PlayerDataStorage;
 import org.ayosynk.utils.LocationUtils;
 import org.bukkit.Location;
@@ -27,6 +30,7 @@ public final class ArenaLite extends JavaPlugin {
     private KitManager kitManager;
     private RegenManager regenManager;
     private StatsManager statsManager;
+    private SnapshotManager snapshotManager;
     
     private FAWEHook faweHook;
     private PlaceholderAPIHook placeholderAPIHook;
@@ -52,6 +56,7 @@ public final class ArenaLite extends JavaPlugin {
         kitManager = new KitManager(this);
         regenManager = new RegenManager(this);
         statsManager = new StatsManager(this);
+        snapshotManager = new SnapshotManager(this);
         
         // Load data
         arenaManager.loadArenas();
@@ -72,6 +77,7 @@ public final class ArenaLite extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new CombatListener(this), this);
         getServer().getPluginManager().registerEvents(new KitPreviewListener(this, kitManager), this);
         getServer().getPluginManager().registerEvents(new BuildListener(this), this);
+        getServer().getPluginManager().registerEvents(new FreezeListener(this), this);
         
         // Initialize hooks
         initializeHooks();
@@ -104,15 +110,16 @@ public final class ArenaLite extends JavaPlugin {
         // FAWE Hook
         if (getServer().getPluginManager().getPlugin("FastAsyncWorldEdit") != null) {
             faweHook = new FAWEHook(this);
-            getLogger().info("FAWE hook enabled!");
+            getLogger().info("FAWE hook enabled (optional).");
         } else {
-            getLogger().warning("FAWE not found! Regen features will be disabled.");
+            // Optional dependency; built-in regen is used when FAWE is not present
         }
         
         // PlaceholderAPI Hook
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             placeholderAPIHook = new PlaceholderAPIHook(this);
             placeholderAPIHook.register();
+            new ArenaRegenPlaceholder(this).register();
             getLogger().info("PlaceholderAPI hook enabled!");
         }
         
@@ -173,6 +180,10 @@ public final class ArenaLite extends JavaPlugin {
     
     public VaultHook getVaultHook() {
         return vaultHook;
+    }
+
+    public SnapshotManager getSnapshotManager() {
+        return snapshotManager;
     }
 
     public Location getFfaSpawn() {

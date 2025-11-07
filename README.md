@@ -10,6 +10,8 @@ A configurable kit-based Free-For-All (FFA) plugin for Paper 1.21+ servers. Aren
 - **Safety Options** – Join protection and anti-cleanup buffs are fully configurable (or disable them entirely).
 - **Storage Choices** – Player stats persist to YAML by default with optional MySQL support.
 - **Optional Hooks** – Integrates with FastAsyncWorldEdit (FAWE), PlaceholderAPI, and Vault when present.
+- **Safe Regen** – During arena regeneration, players inside the arena are teleported to that arena's set spawn and have movement locked until regen finishes.
+- **Placeholders & Leaderboards** – PlaceholderAPI support for player stats and per-kit leaderboards (see Wiki for full list).
 
 ## Commands
 
@@ -101,7 +103,7 @@ Additional configuration lives in:
 
 ## Optional Integrations
 
-- **FastAsyncWorldEdit** – Required for asynchronous regeneration. Without FAWE, regen commands are ignored.
+- **FastAsyncWorldEdit** – Speeds up and enhances regeneration when present. Without FAWE, ArenaLite uses its built-in snapshot-based regen.
 - **PlaceholderAPI** – Registers `%arenalite_*%` placeholders automatically.
 - **Vault** – Foundation for upcoming economy rewards (hook loads when Vault is present).
 
@@ -121,8 +123,10 @@ Additional configuration lives in:
 ## Useful Links
 
 - [docs/SETUP.md](docs/SETUP.md) – Step-by-step arena & kit setup.
+- [docs/REGEN.md](docs/REGEN.md) – How safe regeneration works and how to configure it.
 - [docs/API.md](docs/API.md) – Working with ArenaLite in your own plugins.
 - [docs/PERFORMANCE.md](docs/PERFORMANCE.md) – Tuning advice for larger servers.
+- [docs/Wiki.md](docs/Wiki.md) – Commands, permissions, placeholders, and usage tips.
 
 ## Building From Source
 

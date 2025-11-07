@@ -276,11 +276,12 @@ public class FFASetupCommand implements CommandExecutor {
         if (regen) {
             int interval = plugin.getConfig().getInt("regen.default-interval", 300);
             arena.setRegenInterval(interval);
-            
-            // Check if FAWE is available
-            if (plugin.getFAWEHook() == null || !plugin.getFAWEHook().isAvailable()) {
-                MessageUtils.sendMessage(player, "commands.ffasetup.setregen.fawe-warning");
-            }
+            // Capture snapshot immediately so regen can work without FAWE
+            plugin.getSnapshotManager().captureSnapshot(arena).whenComplete((v, ex) -> {
+                if (ex != null) {
+                    plugin.getLogger().warning("Snapshot capture failed for arena " + arena.getName() + ": " + ex.getMessage());
+                }
+            });
         }
         
         plugin.getArenaManager().saveArenas();
