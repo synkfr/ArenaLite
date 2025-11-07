@@ -1,7 +1,9 @@
 package org.ayosynk.storage;
 
 import org.ayosynk.ArenaLite;
+import org.ayosynk.models.KitStats;
 import org.ayosynk.models.PlayerData;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -13,7 +15,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -35,6 +39,7 @@ public class PlayerDataStorage {
     private String username;
     private String password;
     private String tableName;
+    private String kitStatsTableName;
     private boolean driverLoaded;
 
     public PlayerDataStorage(ArenaLite plugin) {
@@ -95,6 +100,7 @@ public class PlayerDataStorage {
         String prefix = config.getString("storage.mysql.table-prefix", "arenalite_");
 
         tableName = sanitizeTableName(prefix + "player_data");
+        kitStatsTableName = sanitizeTableName(prefix + "kit_stats");
 
         jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + database +
                 "?useSSL=" + useSsl + "&autoReconnect=true&characterEncoding=utf8";
@@ -115,6 +121,15 @@ public class PlayerDataStorage {
                     "`kills` INT NOT NULL DEFAULT 0, " +
                     "`deaths` INT NOT NULL DEFAULT 0, " +
                     "`streak` INT NOT NULL DEFAULT 0" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+            
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + kitStatsTableName + "` (" +
+                    "`uuid` VARCHAR(36) NOT NULL, " +
+                    "`kit_name` VARCHAR(64) NOT NULL, " +
+                    "`kills` INT NOT NULL DEFAULT 0, " +
+                    "`deaths` INT NOT NULL DEFAULT 0, " +
+                    "`streak` INT NOT NULL DEFAULT 0, " +
+                    "PRIMARY KEY (`uuid`, `kit_name`)" +
                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to initialize MySQL storage.", e);
@@ -172,6 +187,20 @@ public class PlayerDataStorage {
         data.setKills(config.getInt("kills", 0));
         data.setDeaths(config.getInt("deaths", 0));
         data.setStreak(config.getInt("streak", 0));
+        
+        // Load per-kit stats
+        ConfigurationSection kitStatsSection = config.getConfigurationSection("kit-stats");
+        if (kitStatsSection != null) {
+            for (String kitName : kitStatsSection.getKeys(false)) {
+                ConfigurationSection kitSection = kitStatsSection.getConfigurationSection(kitName);
+                if (kitSection != null) {
+                    KitStats stats = data.getKitStats(kitName);
+                    stats.setKills(kitSection.getInt("kills", 0));
+                    stats.setDeaths(kitSection.getInt("deaths", 0));
+                    stats.setStreak(kitSection.getInt("streak", 0));
+                }
+            }
+        }
     }
 
     private void saveToYaml(PlayerData data) {
@@ -182,6 +211,16 @@ public class PlayerDataStorage {
         config.set("kills", data.getKills());
         config.set("deaths", data.getDeaths());
         config.set("streak", data.getStreak());
+        
+        // Save per-kit stats
+        config.set("kit-stats", null);
+        for (Map.Entry<String, KitStats> entry : data.getKitStats().entrySet()) {
+            String kitName = entry.getKey();
+            KitStats stats = entry.getValue();
+            config.set("kit-stats." + kitName + ".kills", stats.getKills());
+            config.set("kit-stats." + kitName + ".deaths", stats.getDeaths());
+            config.set("kit-stats." + kitName + ".streak", stats.getStreak());
+        }
 
         try {
             config.save(file);
@@ -205,6 +244,24 @@ public class PlayerDataStorage {
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to load player data from MySQL for " + data.getUuid(), e);
         }
+        
+        // Load per-kit stats
+        String kitQuery = "SELECT kit_name, kills, deaths, streak FROM `" + kitStatsTableName + "` WHERE uuid = ?";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(kitQuery)) {
+            statement.setString(1, data.getUuid().toString());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String kitName = resultSet.getString("kit_name");
+                    KitStats stats = data.getKitStats(kitName);
+                    stats.setKills(resultSet.getInt("kills"));
+                    stats.setDeaths(resultSet.getInt("deaths"));
+                    stats.setStreak(resultSet.getInt("streak"));
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to load kit stats from MySQL for " + data.getUuid(), e);
+        }
     }
 
     private void saveToMySql(PlayerData data) {
@@ -220,6 +277,25 @@ public class PlayerDataStorage {
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to save player data to MySQL for " + data.getUuid(), e);
         }
+        
+        // Save per-kit stats
+        String kitQuery = "INSERT INTO `" + kitStatsTableName + "` (uuid, kit_name, kills, deaths, streak) VALUES (?, ?, ?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE kills = VALUES(kills), deaths = VALUES(deaths), streak = VALUES(streak)";
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(kitQuery)) {
+            for (Map.Entry<String, KitStats> entry : data.getKitStats().entrySet()) {
+                statement.setString(1, data.getUuid().toString());
+                statement.setString(2, entry.getKey());
+                KitStats stats = entry.getValue();
+                statement.setInt(3, stats.getKills());
+                statement.setInt(4, stats.getDeaths());
+                statement.setInt(5, stats.getStreak());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        } catch (SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to save kit stats to MySQL for " + data.getUuid(), e);
+        }
     }
 
     private File getPlayerFile(UUID uuid) {
@@ -232,6 +308,39 @@ public class PlayerDataStorage {
         return new File(dataFolder, uuid.toString() + ".yml");
     }
 
+    public Map<UUID, PlayerData> getAllPlayerData() {
+        Map<UUID, PlayerData> allData = new HashMap<>();
+        
+        if (storageMode == StorageMode.MYSQL) {
+            // For MySQL, we'd need to load all players - this is expensive, so we'll just return cached data
+            // In practice, leaderboard queries should be done via SQL directly
+            return allData;
+        } else {
+            // Load all YAML files
+            if (dataFolder == null || !dataFolder.exists()) {
+                return allData;
+            }
+            
+            File[] files = dataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+            if (files != null) {
+                for (File file : files) {
+                    try {
+                        String fileName = file.getName();
+                        String uuidStr = fileName.substring(0, fileName.length() - 4);
+                        UUID uuid = UUID.fromString(uuidStr);
+                        PlayerData data = new PlayerData(uuid);
+                        loadFromYaml(data);
+                        allData.put(uuid, data);
+                    } catch (Exception e) {
+                        plugin.getLogger().warning("Failed to load player data from " + file.getName() + ": " + e.getMessage());
+                    }
+                }
+            }
+        }
+        
+        return allData;
+    }
+    
     public void close() {
         // No persistent resources to close; connections are handled per operation.
     }

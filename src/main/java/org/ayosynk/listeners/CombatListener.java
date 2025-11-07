@@ -61,9 +61,13 @@ public class CombatListener implements Listener {
         Player killer = player.getKiller();
         if (killer != null) {
             plugin.getStatsManager().onPlayerKill(killer, player);
+        } else {
+            // Still track death for kit stats even if no killer
+            data.addDeath();
+            if (data.getCurrentKit() != null) {
+                data.addDeathForKit(data.getCurrentKit());
+            }
         }
-        
-        data.addDeath();
         
         // Instant respawn
         int delay = Math.max(0, plugin.getConfig().getInt("settings.instant-respawn-delay", 1));

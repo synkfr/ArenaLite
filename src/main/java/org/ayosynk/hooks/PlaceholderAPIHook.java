@@ -36,13 +36,40 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
     
     @Override
     public String onPlaceholderRequest(Player player, String identifier) {
+        String lowerId = identifier.toLowerCase();
+        
+        // Leaderboard placeholders: leaderboard_<type>_<kit>_<position>
+        // Format: leaderboard_kills_kitname_1
+        if (lowerId.startsWith("leaderboard_")) {
+            String rest = lowerId.substring("leaderboard_".length());
+            String[] parts = rest.split("_");
+            if (parts.length >= 3) {
+                String type = parts[0]; // kills, deaths, kdr, streak, player
+                // Last part is position, everything in between is kit name
+                try {
+                    int position = Integer.parseInt(parts[parts.length - 1]);
+                    // Reconstruct kit name from middle parts
+                    StringBuilder kitNameBuilder = new StringBuilder();
+                    for (int i = 1; i < parts.length - 1; i++) {
+                        if (i > 1) kitNameBuilder.append("_");
+                        kitNameBuilder.append(parts[i]);
+                    }
+                    String kitName = kitNameBuilder.toString();
+                    return getLeaderboardValue(type, kitName, position);
+                } catch (NumberFormatException e) {
+                    return "Invalid position";
+                }
+            }
+            return null;
+        }
+        
         if (player == null) {
             return "";
         }
         
         PlayerData data = plugin.getStatsManager().getPlayerData(player);
         
-        switch (identifier.toLowerCase()) {
+        switch (lowerId) {
             case "kills":
                 return String.valueOf(data.getKills());
                 
@@ -77,6 +104,66 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
                 
             default:
                 return null;
+        }
+    }
+    
+    private String getLeaderboardValue(String type, String kitName, int position) {
+        if (position < 1) {
+            return "N/A";
+        }
+        
+        int index = position - 1; // Convert to 0-based index
+        
+        switch (type.toLowerCase()) {
+            case "kills": {
+                var entries = plugin.getStatsManager().getTopKillsForKit(kitName, position);
+                if (index >= entries.size()) {
+                    return "N/A";
+                }
+                return String.valueOf(entries.get(index).getValue());
+            }
+            case "deaths": {
+                var entries = plugin.getStatsManager().getTopDeathsForKit(kitName, position);
+                if (index >= entries.size()) {
+                    return "N/A";
+                }
+                return String.valueOf(entries.get(index).getValue());
+            }
+            case "kdr": {
+                var entries = plugin.getStatsManager().getTopKDRForKit(kitName, position);
+                if (index >= entries.size()) {
+                    return "N/A";
+                }
+                return String.format("%.2f", entries.get(index).getValue());
+            }
+            case "streak": {
+                var entries = plugin.getStatsManager().getTopStreakForKit(kitName, position);
+                if (index >= entries.size()) {
+                    return "N/A";
+                }
+                return String.valueOf(entries.get(index).getValue());
+            }
+            case "player": {
+                // Try kills first, then deaths, then kdr, then streak
+                var entries = plugin.getStatsManager().getTopKillsForKit(kitName, position);
+                if (index >= entries.size()) {
+                    entries = plugin.getStatsManager().getTopDeathsForKit(kitName, position);
+                    if (index >= entries.size()) {
+                        var kdrEntries = plugin.getStatsManager().getTopKDRForKit(kitName, position);
+                        if (index >= kdrEntries.size()) {
+                            entries = plugin.getStatsManager().getTopStreakForKit(kitName, position);
+                            if (index >= entries.size()) {
+                                return "N/A";
+                            }
+                        } else {
+                            return plugin.getStatsManager().getPlayerName(kdrEntries.get(index).getKey());
+                        }
+                    }
+                }
+                return plugin.getStatsManager().getPlayerName(entries.get(index).getKey());
+            }
+            default:
+                return "Invalid type";
         }
     }
     

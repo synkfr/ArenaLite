@@ -26,8 +26,6 @@ arenas:
 
 # Gameplay Settings
 settings:
-  hotbar-enabled: false         # Enable/disable hotbar items
-  scoreboard-enabled: true      # Enable/disable scoreboard
   kit-previews:
     enabled: true               # Toggle kit previews command
     readonly: true              # Prevent players from taking items from preview

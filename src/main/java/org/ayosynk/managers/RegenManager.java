@@ -15,7 +15,6 @@ import java.util.UUID;
 public class RegenManager {
     
     private final ArenaLite plugin;
-    private final Map<String, BukkitTask> regenTasks = new HashMap<>();
     private final Map<String, Set<UUID>> frozenPlayers = new HashMap<>();
     
     public RegenManager(ArenaLite plugin) {

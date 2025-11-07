@@ -26,8 +26,6 @@ public class ConfigManager {
         saveDefaultConfig("kits.yml");
         saveDefaultConfig("settings.yml");
         saveDefaultConfig("messages.yml");
-        saveDefaultConfig("scoreboard.yml");
-        saveDefaultConfig("hotbar.yml");
         
         // Load all configs
         configs.put("config", plugin.getConfig());
@@ -35,8 +33,6 @@ public class ConfigManager {
         loadConfig("kits.yml");
         loadConfig("settings.yml");
         loadConfig("messages.yml");
-        loadConfig("scoreboard.yml");
-        loadConfig("hotbar.yml");
     }
     
     private void saveDefaultConfig(String name) {

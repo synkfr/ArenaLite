@@ -1,5 +1,8 @@
 package org.ayosynk.models;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 public class PlayerData {
@@ -12,6 +15,7 @@ public class PlayerData {
     private String currentArena;
     private long joinTime;
     private boolean inArena;
+    private final Map<String, KitStats> kitStats = new HashMap<>();
     
     public PlayerData(UUID uuid) {
         this.uuid = uuid;
@@ -96,6 +100,29 @@ public class PlayerData {
     
     public void setInArena(boolean inArena) {
         this.inArena = inArena;
+    }
+    
+    public KitStats getKitStats(String kitName) {
+        if (kitName == null) {
+            return null;
+        }
+        return kitStats.computeIfAbsent(kitName.toLowerCase(Locale.ROOT), k -> new KitStats());
+    }
+    
+    public Map<String, KitStats> getKitStats() {
+        return kitStats;
+    }
+    
+    public void addKillForKit(String kitName) {
+        if (kitName != null) {
+            getKitStats(kitName).addKill();
+        }
+    }
+    
+    public void addDeathForKit(String kitName) {
+        if (kitName != null) {
+            getKitStats(kitName).addDeath();
+        }
     }
 }
 
